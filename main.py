@@ -2,6 +2,8 @@ import os
 import datetime
 import discord
 from keep_alive import keep_alive
+
+
 intents = discord.Intents.default()
 intents.message_content = True
 client = discord.Client(intents=intents)
