@@ -1,6 +1,5 @@
 import os
 import datetime
-from typing_extensions import TypeVarTuple
 import discord
 
 intents = discord.Intents.default()
@@ -34,7 +33,7 @@ async def gaming_command(message):
     if dateNow >= (dateEvent - 7) and dateNow <= (dateEvent + 7) and event.status != 4:
       m = int(monthOfEvent / 100) 
       d = dayOfEvent
-      eventExists = TypeVarTuple
+      eventExists = True
       await message.channel.send('We are gaming Sunday ' + str(m) + '/' + str(d))
   if not eventExists:
     await message.channel.send('We are not gaming this Sunday')
@@ -76,5 +75,8 @@ async def on_message(message):
     message.content != '!lore': 
     await lore_command(message)
     
-token = os.getenv('TOKEN')
-client.run(token)
+token = os.environ['TOKEN']
+if token is not None:
+  client.run(token)
+else:
+  print("Error: 'TOKEN' environment variable not found.")
