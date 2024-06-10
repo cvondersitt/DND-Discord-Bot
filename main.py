@@ -26,9 +26,8 @@ async def on_message(message):
       await message.channel.send('We are not gaming this Sunday') 
     else:
       await message.channel.send('We gaming boys')
-
-# token = os.getenv('TOKEN')
-token = 'MTI0OTczMTk3MzA1NzA4OTYwOQ.GVLQGx.-UmXT76rHvgTJJachz6plKptamcludkiz_QKrI'
+      
+token = os.getenv('TOKEN'
 
 if token is None:
   print('Please set the TOKEN environment variable.')
