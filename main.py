@@ -75,7 +75,6 @@ async def on_message(message):
     message.content != '!lore': 
     await lore_command(message)
 
-
 token = os.environ['TOKEN']
 keep_alive()
 client.run(token)
