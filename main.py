@@ -51,6 +51,12 @@ async def lore_command(message):
   else:
     await message.channel.send('That is not a valid lore')
 
+async def help_command(message):
+  await message.channel.send('Here are the following commands: ')
+  await message.channel.send('!lore help: displays a list of lores')
+  await message.channel.send('!lore (name of lore): displays the lore')
+  await message.channel.send('!gaming: displays if we are gaming this Sunday')
+  
 @client.event
 async def on_message(message):       
   if message.author == client.user:
@@ -58,7 +64,10 @@ async def on_message(message):
 
   if message.content.startswith('!gaming'):
     await gaming_command(message)
-
+    
+  if message.content.startswith('!help'):
+    await help_command(message)
+    
   if message.content == '!lore help' or message.content == '!lore':
     await lore_help(message)
     
