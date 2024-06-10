@@ -1,7 +1,7 @@
 import os
 import datetime
 import discord
-
+from keep_alive import keep_alive
 intents = discord.Intents.default()
 intents.message_content = True
 client = discord.Client(intents=intents)
@@ -74,9 +74,8 @@ async def on_message(message):
     message.content != '!lore help' and \
     message.content != '!lore': 
     await lore_command(message)
-    
+
+
 token = os.environ['TOKEN']
-if token is not None:
-  client.run(token)
-else:
-  print("Error: 'TOKEN' environment variable not found.")
+keep_alive()
+client.run(token)
