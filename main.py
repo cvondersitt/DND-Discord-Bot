@@ -34,7 +34,7 @@ async def gaming_command(message):
       m = int(monthOfEvent / 100) 
       d = dayOfEvent
       eventExists = True
-      await message.channel.send('We are gaming Sunday ' + str(m) + '/' + str(d))
+      await message.channel.send('We are gaming this Sunday ' + str(m) + '/' + str(d))
   if not eventExists:
     await message.channel.send('We are not gaming this Sunday')
     
