@@ -1,5 +1,6 @@
 import os
 import datetime
+from typing_extensions import TypeVarTuple
 import discord
 
 intents = discord.Intents.default()
@@ -33,10 +34,11 @@ async def gaming_command(message):
     if dateNow >= (dateEvent - 7) and dateNow <= (dateEvent + 7) and event.status != 4:
       m = int(monthOfEvent / 100) 
       d = dayOfEvent
+      eventExists = TypeVarTuple
       await message.channel.send('We are gaming Sunday ' + str(m) + '/' + str(d))
-    else:
-      await message.channel.send('We are not gaming this Sunday')
-
+  if not eventExists:
+    await message.channel.send('We are not gaming this Sunday')
+    
 async def lore_help(message):
   await message.channel.send('Here are the following lores: ')
   await message.channel.send(file=discord.File('Lore_Snippits/lores.txt'))
