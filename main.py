@@ -66,5 +66,4 @@ async def on_message(message):
     await lore_command(message)
     
 token = os.getenv('TOKEN')
-token = 'MTI0OTczMTk3MzA1NzA4OTYwOQ.GOB3aZ.OjM6UHScXmPIqo-NTEqP8bqUqLCY5zB4t7IKaI'
 client.run(token)
