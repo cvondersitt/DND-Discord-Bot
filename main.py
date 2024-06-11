@@ -1,7 +1,6 @@
-import os
 import datetime
+import os
 import discord
-from keep_alive import keep_alive
 
 
 intents = discord.Intents.default()
@@ -78,5 +77,4 @@ async def on_message(message):
     await lore_command(message)
 
 token = os.environ['TOKEN']
-keep_alive()
 client.run(token)
