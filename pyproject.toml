@@ -10,6 +10,7 @@ discord-py = "^2.3.2"
 aiohttp = "^3.9.5"
 typing-extensions = "^4.12.2"
 flask = "^3.0.3"
+openai = "^1.33.0"
 
 [tool.pyright]
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md

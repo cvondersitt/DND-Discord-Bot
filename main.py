@@ -1,7 +1,7 @@
 import datetime
 import os
 import discord
-
+from openai import OpenAI
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -10,16 +10,25 @@ client = discord.Client(intents=intents)
 @client.event
 async def on_ready():
   print('We have logged in as {0.user}'.format(client))
+  await globals()
+  await load_lore()
+
+async def globals():
   myguild = client.guilds[0]
   global events 
   events = await myguild.fetch_scheduled_events()
   global lores
   lores = []
+  key = os.environ["OPENAI_API_KEY"]
+  global gptClient 
+  gptClient = OpenAI(api_key=key)
+
+async def load_lore():
   with open("Lore_Snippits/lores.txt", "r") as f:
     for line in f:
       lores.append(line.strip())
   f.close()
-
+  
 async def gaming_command(message):
   eventExists = False
   for event in events:
