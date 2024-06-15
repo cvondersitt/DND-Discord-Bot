@@ -1,3 +1,4 @@
+import settings
 import datetime
 import os
 import discord
@@ -6,8 +7,7 @@ from discord.ext import commands
 
 intents = discord.Intents.default()
 intents.message_content = True
-# client = discord.Client(intents=intents)
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = commands.Bot(command_prefix='!', intents=intents, help_command=None)
 @bot.event
 async def on_ready():
   print('We have logged in as {0.user}'.format(bot))
@@ -15,7 +15,7 @@ async def on_ready():
   await load_lore()
 
 async def globals():
-  myguild = client.guilds[0]
+  myguild = bot.guilds[0]
   global events 
   events = await myguild.fetch_scheduled_events()
   global lores
@@ -27,7 +27,9 @@ async def load_lore():
       lores.append(line.strip().lower())
   f.close()
   
-async def gaming_command(message):
+@bot.command()
+async def gaming(ctx, args = None):
+  """Shows if we are playing this Sunday"""
   eventExists = False
   for event in events:
     monthOfEvent = 100 * event.start_time.month
@@ -36,60 +38,54 @@ async def gaming_command(message):
     dayNow = datetime.date.today().day
     monthNow = 100 * datetime.date.today().month
     dateNow = dayNow + monthNow
-    print(dateNow)
-    print(dateEvent)
     if dateNow >= (dateEvent - 7) and dateNow <= (dateEvent + 7) and event.status != 4:
       m = int(monthOfEvent / 100) 
       d = dayOfEvent
       eventExists = True
-      await message.channel.send('We are gaming this Sunday ' + str(m) + '/' + str(d))
+      await ctx.channel.send('We are gaming this Sunday ' + str(m) + '/' + str(d))
   if not eventExists:
-    await message.channel.send('We are not gaming this Sunday')
-    
-async def lore_help(message):
+    await ctx.channel.send('We are not gaming this Sunday')
+
+@bot.command()
+async def lorelist(ctx, args = None):
+  """Displays a list of all available lores"""
   loreMessage = ''
   with open("Lore_Snippits/lores.txt", "r") as f:
     for line in f:
       loreMessage += line
   f.close()
-  await message.channel.send('**Here are the following lores:** ')
-  await message.channel.send(loreMessage)
-  await message.channel.send('**To get a lore, type !lore (name of lore)**')
+  await ctx.channel.send('**Here are the following lores:** ')
+  await ctx.channel.send(loreMessage)
+  await ctx.channel.send('**To get a lore, type !lore (name of lore)**')
 
-async def lore_command(message):
-  query = message.content[6:]
+@bot.command()
+async def lore(ctx, arg):
+  """Displays a lore snippit"""
+  query = arg
   query = query.lower().strip()
-  print(query)
+  if query == 'list':
+    await lorelist(ctx)
+    return
+  
   if query in lores:
     fileName = 'Lore_Snippits/' + query + '.png'
-    await message.channel.send(file=discord.File(fileName))
+    await ctx.channel.send(file=discord.File(fileName))
   else:
-    await message.channel.send('That is not a valid lore')
+    await ctx.channel.send('That is not a valid lore')
 
-async def help_command(message):
-  await message.channel.send('**Here are the following commands:** ')
-  await message.channel.send('!lore help: displays a list of lores')
-  await message.channel.send('!lore (name of lore): displays the lore')
-  await message.channel.send('!gaming: displays if we are gaming this Sunday')
-  
-@bot.event
-async def on_message(message):       
-  if message.author == client.user:
-    return
+@bot.command()
+async def help(ctx, args = None):
+  helpMessage = (
+    '**Here are the available commands:**\n\n'
+    '!lore list: displays a list of lores\n'
+    '!lore (name of lore): displays the lore\n'
+    '!gaming: displays if we are gaming this Sunday'
+  )
+  await ctx.channel.send(helpMessage)
 
-  if message.content.startswith('!gaming'):
-    await gaming_command(message)
-    
-  if message.content.startswith('!help'):
-    await help_command(message)
-    
-  if message.content == '!lore help' or message.content == '!lore':
-    await lore_help(message)
-    
-  if message.content.startswith('!lore') and \
-    message.content != '!lore help' and \
-    message.content != '!lore': 
-    await lore_command(message)
 
-token = os.environ['TOKEN']
-bot.run(token)
+@lore.error
+async def lore_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send('You must provide a lore')
+bot.run(settings.DISCORD_API_SECRET)
