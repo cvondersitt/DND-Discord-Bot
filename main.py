@@ -1,15 +1,16 @@
 import datetime
 import os
 import discord
-from openai import OpenAI
+from discord.ext import commands
+
 
 intents = discord.Intents.default()
 intents.message_content = True
-client = discord.Client(intents=intents)
-
-@client.event
+# client = discord.Client(intents=intents)
+bot = commands.Bot(command_prefix='!', intents=intents)
+@bot.event
 async def on_ready():
-  print('We have logged in as {0.user}'.format(client))
+  print('We have logged in as {0.user}'.format(bot))
   await globals()
   await load_lore()
 
@@ -19,14 +20,11 @@ async def globals():
   events = await myguild.fetch_scheduled_events()
   global lores
   lores = []
-  key = os.environ["OPENAI_API_KEY"]
-  global gptClient 
-  gptClient = OpenAI(api_key=key)
 
 async def load_lore():
   with open("Lore_Snippits/lores.txt", "r") as f:
     for line in f:
-      lores.append(line.strip())
+      lores.append(line.strip().lower())
   f.close()
   
 async def gaming_command(message):
@@ -49,24 +47,32 @@ async def gaming_command(message):
     await message.channel.send('We are not gaming this Sunday')
     
 async def lore_help(message):
-  await message.channel.send('Here are the following lores: ')
-  await message.channel.send(file=discord.File('Lore_Snippits/lores.txt'))
-  await message.channel.send('To get a lore, type !lore (name of lore)')
+  loreMessage = ''
+  with open("Lore_Snippits/lores.txt", "r") as f:
+    for line in f:
+      loreMessage += line
+  f.close()
+  await message.channel.send('**Here are the following lores:** ')
+  await message.channel.send(loreMessage)
+  await message.channel.send('**To get a lore, type !lore (name of lore)**')
 
 async def lore_command(message):
-  if message.content[6:] in lores:
-    fileName = 'Lore_Snippits/' + message.content[6:] + '.png'
+  query = message.content[6:]
+  query = query.lower().strip()
+  print(query)
+  if query in lores:
+    fileName = 'Lore_Snippits/' + query + '.png'
     await message.channel.send(file=discord.File(fileName))
   else:
     await message.channel.send('That is not a valid lore')
 
 async def help_command(message):
-  await message.channel.send('Here are the following commands: ')
+  await message.channel.send('**Here are the following commands:** ')
   await message.channel.send('!lore help: displays a list of lores')
   await message.channel.send('!lore (name of lore): displays the lore')
   await message.channel.send('!gaming: displays if we are gaming this Sunday')
   
-@client.event
+@bot.event
 async def on_message(message):       
   if message.author == client.user:
     return
@@ -86,4 +92,4 @@ async def on_message(message):
     await lore_command(message)
 
 token = os.environ['TOKEN']
-client.run(token)
+bot.run(token)
