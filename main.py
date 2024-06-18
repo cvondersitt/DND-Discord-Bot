@@ -53,10 +53,9 @@ async def gaming(interaction: discord.Interaction):
 
 @bot.tree.command()
 async def sessionstart(interaction: discord.Interaction):
+    global sessionBegin
     if (sessionBegin is not None):
         await interaction.response.send_message("You may not start two sessions at once.")
-    
-    global sessionBegin
     sessionBegin = datetime.datetime.now()
     formatted_time = sessionBegin.strftime("%A, %B %d, %Y at %I:%M %p")
     await interaction.response.send_message(
