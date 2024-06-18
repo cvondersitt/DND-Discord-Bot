@@ -10,18 +10,20 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 
-bot = commands.Bot(command_prefix='!', intents=intents, help_command=None)
+bot = commands.Bot(command_prefix='/', intents=intents, help_command=None)
 
 @bot.event
 async def on_ready():
     print(f'We have logged in as {bot.user}')
     await initialize_globals()
     await load_lore()
+    bot.tree.copy_global_to(guild=settings.GUILD_ID_DEV)
     await bot.tree.sync(guild=settings.GUILD_ID_DEV)
 
 # Global variables
 events = []
 lores = []
+sessionBegin = None
 
 async def initialize_globals():
     global events
@@ -48,6 +50,24 @@ async def gaming(interaction: discord.Interaction):
     
     if not event_exists:
         await interaction.response.send_message('We are not gaming this Sunday')
+
+@bot.tree.command()
+async def sessionstart(interaction: discord.Interaction):
+    global sessionBegin
+    sessionBegin = datetime.date.now()
+    await interaction.response.send_message("The session has started at " + str(sessionBegin) + ". Please join the session chat @everyone!")
+
+@bot.tree.command()
+async def sessionend(interaction: discord.Interaction):
+    global sessionBegin
+    if sessionBegin == None:
+        await interaction.response.send_message("Please start a session with /sessionstart")
+        return
+    sessionFinal = datetime.date.now()
+    difference = sessionFinal - sessionBegin
+    await interaction.response.send_message(
+        "The session has ended at " + str(sessionFinal) + ". The session duration was " + str(difference) + ".")
+    sessionBegin = None
 
 @bot.tree.command()
 async def lorelist(interaction: discord.Interaction):
