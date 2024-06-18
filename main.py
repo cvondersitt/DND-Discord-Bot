@@ -155,6 +155,8 @@ async def help(interaction: discord.Interaction):
         '/lorelist: displays a list of lores\n'
         '/lore (name of lore): displays the lore\n'
         '/gaming: displays if we are gaming this Sunday\n'
+        '/sessionstart: starts a D&D session with a timer. Reminds you ever 5 hours to end\n'
+        '/sessionend: ends a D&D session and stops the timer\n'
         '/help: displays this message'
     )
     await interaction.response.send_message(help_message)
