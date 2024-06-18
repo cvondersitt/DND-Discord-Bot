@@ -3,6 +3,7 @@ import datetime
 import os
 import discord
 import typing
+import asyncio
 from discord.ext import commands
 from discord import app_commands
 
@@ -56,12 +57,27 @@ async def sessionstart(interaction: discord.Interaction):
     global sessionBegin
     if (sessionBegin is not None):
         await interaction.response.send_message("You may not start two sessions at once.")
+        return
     sessionBegin = datetime.datetime.now()
     formatted_time = sessionBegin.strftime("%A, %B %d, %Y at %I:%M %p")
     await interaction.response.send_message(
         content=f"The session has started at {formatted_time}. Please join the session chat @everyone!",
         allowed_mentions=discord.AllowedMentions(everyone=True)
     )
+    await remind_end(interaction)
+    
+
+async def remind_end(interaction: discord.Interaction):
+    global sessionBegin
+    await asyncio.sleep(18000)  # Wait for 5 hours
+    if (sessionBegin is None):
+        return
+    
+    await interaction.followup.send(
+        content=f"Your session has been going on for a while. Did you mean to **/sessionend** <@{interaction.user.id}>?",
+        allowed_mentions=discord.AllowedMentions(users=True)
+    )
+    
 
 @bot.tree.command()
 async def sessionend(interaction: discord.Interaction):
