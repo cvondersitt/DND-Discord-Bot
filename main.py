@@ -11,7 +11,6 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 bot = commands.Bot(command_prefix='!', intents=intents, help_command=None)
-
 @bot.event
 async def on_ready():
   print('We have logged in as {0.user}'.format(bot))
@@ -20,24 +19,25 @@ async def on_ready():
   # bot.tree.copy_global_to(guild=settings.GUILD_ID_DEV)
   await bot.tree.sync(guild=settings.GUILD_ID_DEV)
 
+lores = []
 async def globals():
-  global __MYGUILD__
-  __MYGUILD__ = bot.guilds[0]
-  global __EVENTS__
-  __EVENTS__ = __MYGUILD__.fetch_scheduled_events()
-  global __LORES__
-  __LORES__ = [] # Populates with lores in load lores
+  myguild = bot.guilds[0]
+  global events 
+  events = await myguild.fetch_scheduled_events()
+  global lores
+  
+
 async def load_lore():
   with open("Lore_Snippits/lores.txt", "r") as f:
     for line in f:
-      __LORES__.append(line.strip().lower())
+      lores.append(line.strip().lower())
   f.close()
 
 @bot.tree.command()
 async def gaming(interaction: discord.Interaction):
   """Shows if we are playing this Sunday"""
   eventExists = False
-  for event in __EVENTS__:
+  for event in events:
     monthOfEvent = 100 * event.start_time.month
     dayOfEvent = event.start_time.day
     dateEvent = monthOfEvent + dayOfEvent
@@ -69,7 +69,7 @@ async def lore_autocomplete(
   current: str
 ) -> typing.List[app_commands.Choice[str]]:
   data = []
-  for l in __LORES__:
+  for l in lores:
     if current.lower() in l.lower():
       data.append(app_commands.Choice(name=l, value=l))
   return data
@@ -84,7 +84,7 @@ async def lore(interaction: discord.Interaction, lore: str):
     await lorelist(interaction)
     return
   
-  if query in __LORES__:
+  if query in lores:
     fileName = 'Lore_Snippits/' + query + '.png'
     await interaction.response.send_message(file=discord.File(fileName))
   else:
