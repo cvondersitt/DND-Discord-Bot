@@ -10,7 +10,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 
-bot = commands.Bot(command_prefix='/', intents=intents, help_command=None)
+bot = commands.Bot(command_prefix='/', intents=discord.Intents.all(), help_command=None)
 
 @bot.event
 async def on_ready():
@@ -53,9 +53,16 @@ async def gaming(interaction: discord.Interaction):
 
 @bot.tree.command()
 async def sessionstart(interaction: discord.Interaction):
+    if (sessionBegin is not None):
+        await interaction.response.send_message("You may not start two sessions at once.")
+    
     global sessionBegin
-    sessionBegin = datetime.date.now()
-    await interaction.response.send_message("The session has started at " + str(sessionBegin) + ". Please join the session chat @everyone!")
+    sessionBegin = datetime.datetime.now()
+    formatted_time = sessionBegin.strftime("%A, %B %d, %Y at %I:%M %p")
+    await interaction.response.send_message(
+        content=f"The session has started at {formatted_time}. Please join the session chat @everyone!",
+        allowed_mentions=discord.AllowedMentions(everyone=True)
+    )
 
 @bot.tree.command()
 async def sessionend(interaction: discord.Interaction):
@@ -63,11 +70,32 @@ async def sessionend(interaction: discord.Interaction):
     if sessionBegin == None:
         await interaction.response.send_message("Please start a session with /sessionstart")
         return
-    sessionFinal = datetime.date.now()
+    sessionFinal = datetime.datetime.now()
     difference = sessionFinal - sessionBegin
+    difference = format_timedelta(difference)
+    final_formatted = sessionFinal.strftime("%A, %B %d, %Y at %I:%M %p")
+    # formatted_time = difference.strftime("%A, %B %d, %Y at %I:%M %p")
     await interaction.response.send_message(
-        "The session has ended at " + str(sessionFinal) + ". The session duration was " + str(difference) + ".")
+        content=f"The session has ended at {final_formatted}. The session duration was {difference}.")
     sessionBegin = None
+
+
+def format_timedelta(delta):
+    days = delta.days
+    hours, remainder = divmod(delta.seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    
+    parts = []
+    if days > 0:
+        parts.append(f"{days} day{'s' if days != 1 else ''}")
+    if hours > 0:
+        parts.append(f"{hours} hour{'s' if hours != 1 else ''}")
+    if minutes > 0:
+        parts.append(f"{minutes} minute{'s' if minutes != 1 else ''}")
+    if seconds > 0:
+        parts.append(f"{seconds} second{'s' if seconds != 1 else ''}")
+    
+    return ", ".join(parts)
 
 @bot.tree.command()
 async def lorelist(interaction: discord.Interaction):
