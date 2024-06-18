@@ -18,7 +18,7 @@ async def on_ready():
     print(f'We have logged in as {bot.user}')
     await initialize_globals()
     await load_lore()
-    # bot.tree.copy_global_to(guild=settings.GUILD_ID_DEV)
+    bot.tree.copy_global_to(guild=settings.GUILD_ID_DEV)
     await bot.tree.sync(guild=settings.GUILD_ID_DEV)
 
 # Global variables
@@ -54,7 +54,7 @@ async def gaming(interaction: discord.Interaction):
 
 @bot.tree.command()
 async def sessionstart(interaction: discord.Interaction):
-    '''Starts a D&D Session'''
+    """Starts a D&D Session"""
     global sessionBegin
     if (sessionBegin is not None):
         await interaction.response.send_message("You may not start two sessions at once.")
@@ -82,7 +82,7 @@ async def remind_end(interaction: discord.Interaction):
 
 @bot.tree.command()
 async def sessionend(interaction: discord.Interaction):
-    '''Ends a D&D Session'''
+    """Ends a D&D Session"""
     global sessionBegin
     if sessionBegin == None:
         await interaction.response.send_message("Please start a session with /sessionstart")
