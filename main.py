@@ -18,7 +18,7 @@ async def on_ready():
     print(f'We have logged in as {bot.user}')
     await initialize_globals()
     await load_lore()
-    bot.tree.copy_global_to(guild=settings.GUILD_ID_DEV)
+    # bot.tree.copy_global_to(guild=settings.GUILD_ID_DEV)
     await bot.tree.sync(guild=settings.GUILD_ID_DEV)
 
 # Global variables
