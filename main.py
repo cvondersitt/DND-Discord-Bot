@@ -54,6 +54,7 @@ async def gaming(interaction: discord.Interaction):
 
 @bot.tree.command()
 async def sessionstart(interaction: discord.Interaction):
+    '''Starts a D&D Session'''
     global sessionBegin
     if (sessionBegin is not None):
         await interaction.response.send_message("You may not start two sessions at once.")
@@ -81,6 +82,7 @@ async def remind_end(interaction: discord.Interaction):
 
 @bot.tree.command()
 async def sessionend(interaction: discord.Interaction):
+    '''Ends a D&D Session'''
     global sessionBegin
     if sessionBegin == None:
         await interaction.response.send_message("Please start a session with /sessionstart")
