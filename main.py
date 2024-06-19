@@ -4,7 +4,6 @@ import os
 import discord
 import typing
 import asyncio
-# import cv2
 from discord.ext import commands
 from discord import app_commands
 
@@ -12,7 +11,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 
-bot = commands.Bot(command_prefix='/', intents=discord.Intents.all(), help_command=None)
+bot = commands.Bot(command_prefix='/', intents=intents, help_command=None)
 
 @bot.event
 async def on_ready():
@@ -58,7 +57,7 @@ async def gaming(interaction: discord.Interaction):
 async def sessionstart(interaction: discord.Interaction):
     """Starts a D&D Session"""
     global sessionBegin
-    if (sessionBegin is not None):
+    if sessionBegin is not None:
         await interaction.response.send_message("You may not start two sessions at once.")
         return
     sessionBegin = datetime.datetime.now()
@@ -73,7 +72,7 @@ async def sessionstart(interaction: discord.Interaction):
 async def remind_end(interaction: discord.Interaction):
     global sessionBegin
     await asyncio.sleep(18000)  # Wait for 5 hours
-    if (sessionBegin is None):
+    if sessionBegin is None:
         return
     
     await interaction.followup.send(
@@ -86,18 +85,16 @@ async def remind_end(interaction: discord.Interaction):
 async def sessionend(interaction: discord.Interaction):
     """Ends a D&D Session"""
     global sessionBegin
-    if sessionBegin == None:
+    if sessionBegin is None:
         await interaction.response.send_message("Please start a session with /sessionstart")
         return
     sessionFinal = datetime.datetime.now()
     difference = sessionFinal - sessionBegin
     difference = format_timedelta(difference)
     final_formatted = sessionFinal.strftime("%A, %B %d, %Y at %I:%M %p")
-    # formatted_time = difference.strftime("%A, %B %d, %Y at %I:%M %p")
     await interaction.response.send_message(
         content=f"The session has ended at {final_formatted}. The session duration was {difference}.")
     sessionBegin = None
-
 
 def format_timedelta(delta):
     days = delta.days
@@ -154,14 +151,13 @@ async def lore(interaction: discord.Interaction, lore: str):
 @bot.tree.command()
 async def addlore(interaction: discord.Interaction, lore: str):
     """Adds a lore to the database"""
-    if interaction.message.attachments.len() != 1:
-        interaction.response.send_message("Please attach a single image of the lore")
+    if len(interaction.message.attachments) != 1:
+        await interaction.response.send_message("Please attach a single image of the lore")
         return
     filename = 'Lore_Snippets/' + lore
     await interaction.message.attachments[0].save(filename)
-    f = open("Lore_Snippets/lores.txt", "a")
-    f.write(lore.lower())
-    f.close()
+    with open("Lore_Snippets/lores.txt", "a") as f:
+        f.write(f"\n{lore.lower()}")
     await interaction.response.send_message(f"The lore **{lore}** was successfully added.")
     os.system("git add -A")
     os.system("git commit -m 'database updated'")
@@ -175,7 +171,7 @@ async def deletelore(interaction: discord.Interaction, lore: str):
         await interaction.response.send_message(f"The lore **{lore}** does not exist.")
         return
     emojis = ["✅", "❌"]
-    message = interaction.response.send_message(f"Are you sure that you would like to delete **{lore}**")
+    message = await interaction.response.send_message(f"Are you sure that you would like to delete **{lore}**")
 
     for emoji in emojis:
         await message.add_reaction(emoji)
@@ -189,37 +185,36 @@ async def deletelore(interaction: discord.Interaction, lore: str):
             lines = file.readlines()
 
         # Remove the specified line
-        lines = [line for line in lines if line.strip().lower != lore.lower]
+        lines = [line for line in lines if line.strip().lower() != lore.lower()]
 
         # Write the modified list back to the file
         with open('Lore_Snippets/lores.txt', 'w') as file:
             file.writelines(lines)
         
+        # Delete the lore file
+        lore_file_path = f'Lore_Snippets/{lore}.png'
+        if os.path.exists(lore_file_path):
+            os.remove(lore_file_path)
 
 @bot.event
-async def on_reaction_add(payload):
+async def on_reaction_add(reaction, user):
     global deleteLore
-    if payload.message_id != bot.message_id:
+    if reaction.message.id != bot.message_id:
         return
-        
-    channel = bot.get_channel(payload.channel_id)
-    user = bot.get_user(payload.user_id)
-    emoji = payload.emoji.name
 
-    if user != bot.user:
+    if user == bot.user:
         return
-        
-    if emoji == "✅":
-        fixed_channel = bot.get_channel(channel)
-        deleteLore = True
-        await fixed_channel.send("The lore was successfully deleted.")
-    elif emoji == "❌":
-        fixed_channel = bot.get_channel(channel)
-        await fixed_channel.send("The lore was not deleted.")
-    else:
-       return
-
     
+    if str(reaction.emoji) == "✅":
+        deleteLore = True
+    elif str(reaction.emoji) == "❌":
+        deleteLore = False
+
+    # Execute delete lore logic if needed
+    if deleteLore:
+        # Perform lore deletion here
+        pass
+
 @bot.tree.command()
 async def help(interaction: discord.Interaction):
     """Displays the available commands"""
@@ -231,6 +226,7 @@ async def help(interaction: discord.Interaction):
         '/sessionstart: starts a D&D session with a timer. Reminds you ever 5 hours to end\n'
         '/sessionend: ends a D&D session and stops the timer\n'
         '/addlore: Write a lore name to add and attach the lore image\n'
+        '/deletelore: Deletes a lore from the database\n'
         '/help: displays this message'
     )
     await interaction.response.send_message(help_message)
