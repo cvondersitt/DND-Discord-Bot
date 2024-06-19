@@ -4,7 +4,7 @@ import os
 import discord
 import typing
 import asyncio
-import cv2
+# import cv2
 from discord.ext import commands
 from discord import app_commands
 

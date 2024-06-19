@@ -4,4 +4,4 @@ discord.py
 
 schedule
 
-opencv-python
+# opencv-python
