@@ -26,6 +26,7 @@ async def on_ready():
 events = []
 lores = []
 sessionBegin = None
+deleteLore = False
 
 async def initialize_globals():
     global events
@@ -152,16 +153,73 @@ async def lore(interaction: discord.Interaction, lore: str):
 
 @bot.tree.command()
 async def addlore(interaction: discord.Interaction, lore: str):
+    """Adds a lore to the database"""
     if interaction.message.attachments.len() != 1:
         interaction.response.send_message("Please attach a single image of the lore")
         return
-    
     filename = 'Lore_Snippets/' + lore
     await interaction.message.attachments[0].save(filename)
     f = open("Lore_Snippets/lores.txt", "a")
-    f.write(str.lower())
+    f.write(lore.lower())
     f.close()
+    await interaction.response.send_message(f"The lore **{lore}** was successfully added.")
+    os.system("git add -A")
+    os.system("git commit -m 'database updated'")
+    os.system("git push origin main")
 
+@bot.tree.command()
+@app_commands.autocomplete(lore=lore_autocomplete)
+async def deletelore(interaction: discord.Interaction, lore: str):
+    """Removes a lore from the database"""
+    if lore not in lores:
+        await interaction.response.send_message(f"The lore **{lore}** does not exist.")
+        return
+    emojis = ["✅", "❌"]
+    message = interaction.response.send_message(f"Are you sure that you would like to delete **{lore}**")
+
+    for emoji in emojis:
+        await message.add_reaction(emoji)
+    
+    bot.message_id = message.id
+
+    await asyncio.sleep(4)
+    if deleteLore:
+        deleteLore = False
+        with open('Lore_Snippets/lores.txt', 'r') as file:
+            lines = file.readlines()
+
+        # Remove the specified line
+        lines = [line for line in lines if line.strip().lower != lore.lower]
+
+        # Write the modified list back to the file
+        with open('Lore_Snippets/lores.txt', 'w') as file:
+            file.writelines(lines)
+        
+
+@bot.event
+async def on_reaction_add(payload):
+    global deleteLore
+    if payload.message_id != bot.message_id:
+        return
+        
+    channel = bot.get_channel(payload.channel_id)
+    user = bot.get_user(payload.user_id)
+    emoji = payload.emoji.name
+
+    if user != bot.user:
+        return
+        
+    if emoji == "✅":
+        fixed_channel = bot.get_channel(channel)
+        deleteLore = True
+        await fixed_channel.send("The lore was successfully deleted.")
+    elif emoji == "❌":
+        fixed_channel = bot.get_channel(channel)
+        await fixed_channel.send("The lore was not deleted.")
+    else:
+       return
+
+    
 @bot.tree.command()
 async def help(interaction: discord.Interaction):
     """Displays the available commands"""
