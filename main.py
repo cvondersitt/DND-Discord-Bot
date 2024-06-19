@@ -4,6 +4,7 @@ import os
 import discord
 import typing
 import asyncio
+import cv2
 from discord.ext import commands
 from discord import app_commands
 
@@ -150,6 +151,18 @@ async def lore(interaction: discord.Interaction, lore: str):
         await interaction.response.send_message('That is not a valid lore')
 
 @bot.tree.command()
+async def addlore(interaction: discord.Interaction, lore: str):
+    if interaction.message.attachments.len() != 1:
+        interaction.response.send_message("Please attach a single image of the lore")
+        return
+    
+    filename = 'Lore_Snippets/' + lore
+    await interaction.message.attachments[0].save(filename)
+    f = open("Lore_Snippets/lores.txt", "a")
+    f.write(str.lower())
+    f.close()
+
+@bot.tree.command()
 async def help(interaction: discord.Interaction):
     """Displays the available commands"""
     help_message = (
@@ -159,6 +172,7 @@ async def help(interaction: discord.Interaction):
         '/gaming: displays if we are gaming this Sunday\n'
         '/sessionstart: starts a D&D session with a timer. Reminds you ever 5 hours to end\n'
         '/sessionend: ends a D&D session and stops the timer\n'
+        '/addlore: Write a lore name to add and attach the lore image\n'
         '/help: displays this message'
     )
     await interaction.response.send_message(help_message)
