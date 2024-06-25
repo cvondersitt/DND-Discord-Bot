@@ -18,8 +18,17 @@ async def on_ready():
     print(f'We have logged in as {bot.user}')
     await initialize_globals()
     await load_lore()
-    bot.tree.copy_global_to(guild=settings.GUILD_ID_DEV)
-    await bot.tree.sync(guild=settings.GUILD_ID_DEV)
+    for guild in bot.guilds:
+        bot.tree.copy_global_to(guild=guild)
+        await bot.tree.sync(guild=guild)
+    
+
+# @bot.tree.command(name='sync', description='Owner only')
+# async def sync(interaction: discord.Interaction):
+#     if interaction.user == settings.OWNER_ID:
+#         print('test') 
+#     await bot.tree.sync(guild=interaction.guild)
+#     await interaction.response.send_message('Command tree synced.')
 
 # Global variables
 events = []
