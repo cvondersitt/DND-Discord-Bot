@@ -152,20 +152,20 @@ async def lore(interaction: discord.Interaction, lore: str):
 async def addlore(interaction: discord.Interaction, lore: str, image: discord.Attachment):
     """Adds a lore to the database"""
     global lores
-    if lore in lores:
+    filename = 'Lore_Snippets/' + lore + '.png'
+    if os.path.exists(filename) or lore in lores:
         await interaction.response.send_message(f"The lore **{lore}** is already added. Please choose a different lore or delete the existing **{lore}**")
         return
+    path = 'Lore_Snippets/'
+    if not os.path.exists(path):
+        os.mkdir('Lore_Snippets')
     
-    filename = 'Lore_Snippets/' + lore + '.png'
     await image.save(filename)
     with open("Lore_Snippets/lores.txt", "a") as f:
         f.write(f"\n{lore.lower()}")
     await interaction.response.send_message(f"The lore **{lore}** was successfully added.")
 
     await load_lore()
-    # os.system("git add -A")
-    # os.system("git commit -m 'database updated'")
-    # os.system("git push origin main")
 
 @bot.tree.command()
 @app_commands.autocomplete(lore=lore_autocomplete)
