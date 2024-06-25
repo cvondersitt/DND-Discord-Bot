@@ -34,6 +34,7 @@ async def initialize_globals():
 
 async def load_lore():
     global lores
+    lores = []
     with open("Lore_Snippets/lores.txt", "r") as f:
         lores = [line.strip().lower() for line in f]
 
@@ -80,7 +81,6 @@ async def remind_end(interaction: discord.Interaction):
         allowed_mentions=discord.AllowedMentions(users=True)
     )
     
-
 @bot.tree.command()
 async def sessionend(interaction: discord.Interaction):
     """Ends a D&D Session"""
@@ -149,36 +149,46 @@ async def lore(interaction: discord.Interaction, lore: str):
         await interaction.response.send_message('That is not a valid lore')
 
 @bot.tree.command()
-async def addlore(interaction: discord.Interaction, lore: str):
+async def addlore(interaction: discord.Interaction, lore: str, image: discord.Attachment):
     """Adds a lore to the database"""
-    if len(interaction.message.attachments) != 1:
-        await interaction.response.send_message("Please attach a single image of the lore")
+    global lores
+    if lore in lores:
+        await interaction.response.send_message(f"The lore **{lore}** is already added. Please choose a different lore or delete the existing **{lore}**")
         return
-    filename = 'Lore_Snippets/' + lore
-    await interaction.message.attachments[0].save(filename)
+    
+    filename = 'Lore_Snippets/' + lore + '.png'
+    await image.save(filename)
     with open("Lore_Snippets/lores.txt", "a") as f:
         f.write(f"\n{lore.lower()}")
     await interaction.response.send_message(f"The lore **{lore}** was successfully added.")
-    os.system("git add -A")
-    os.system("git commit -m 'database updated'")
-    os.system("git push origin main")
+
+    await load_lore()
+    # os.system("git add -A")
+    # os.system("git commit -m 'database updated'")
+    # os.system("git push origin main")
 
 @bot.tree.command()
 @app_commands.autocomplete(lore=lore_autocomplete)
 async def deletelore(interaction: discord.Interaction, lore: str):
     """Removes a lore from the database"""
+    global lores
+    global deleteLore
     if lore not in lores:
         await interaction.response.send_message(f"The lore **{lore}** does not exist.")
         return
     emojis = ["✅", "❌"]
-    message = await interaction.response.send_message(f"Are you sure that you would like to delete **{lore}**")
+    await interaction.response.send_message(f"Are you sure that you would like to delete **{lore}**")
 
+    message = interaction.channel.last_message
+    if message.author != bot.user:
+        await interaction.followup.send(f"Please try again! (Cole is bad at coding)")
+        return
+    
     for emoji in emojis:
         await message.add_reaction(emoji)
-    
-    bot.message_id = message.id
 
-    await asyncio.sleep(4)
+    await asyncio.sleep(3)
+
     if deleteLore:
         deleteLore = False
         with open('Lore_Snippets/lores.txt', 'r') as file:
@@ -195,25 +205,20 @@ async def deletelore(interaction: discord.Interaction, lore: str):
         lore_file_path = f'Lore_Snippets/{lore}.png'
         if os.path.exists(lore_file_path):
             os.remove(lore_file_path)
+        await interaction.followup.send(f"The lore **{lore}** was successfully deleted")
+    else:
+        await interaction.followup.send(f"The lore **{lore}** was not deleted")
 
 @bot.event
 async def on_reaction_add(reaction, user):
     global deleteLore
-    if reaction.message.id != bot.message_id:
-        return
 
     if user == bot.user:
         return
-    
     if str(reaction.emoji) == "✅":
         deleteLore = True
     elif str(reaction.emoji) == "❌":
         deleteLore = False
-
-    # Execute delete lore logic if needed
-    if deleteLore:
-        # Perform lore deletion here
-        pass
 
 @bot.tree.command()
 async def help(interaction: discord.Interaction):
