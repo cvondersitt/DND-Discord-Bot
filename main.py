@@ -118,7 +118,14 @@ def format_timedelta(delta):
 async def lorelist(interaction: discord.Interaction):
     """Displays all available lores"""
     with open("Lore_Snippets/lores.txt", "r") as f:
-        lore_message = f'**Here are the available lores:** \n{f.read()}\n**To get a lore, type /lore (name of lore)**'
+        lines = f.readlines()
+    
+    # filtered_lines = [line for line in lines if line.strip()]
+    lore_message = f'**Here are the available lores:**'
+    for line in lines:
+        if line.strip():
+            lore_message += ('\n' + line)
+    lore_message += '\n**To get a lore, type /lore (name of lore)**'
     await interaction.response.send_message(lore_message)
 
 async def lore_autocomplete(
