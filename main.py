@@ -154,10 +154,6 @@ async def lore(interaction: discord.Interaction, lore: str):
     """Displays the inputted lore"""
     query = lore.lower().strip()
     
-    if query == 'list':
-        await lorelist(interaction)
-        return
-
     if query in lores:
         file_path = f'Lore_Snippets/{query}.png'
         if os.path.exists(file_path):
