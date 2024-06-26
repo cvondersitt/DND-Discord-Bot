@@ -21,14 +21,6 @@ async def on_ready():
     for guild in bot.guilds:
         bot.tree.copy_global_to(guild=guild)
         await bot.tree.sync(guild=guild)
-    
-
-# @bot.tree.command(name='sync', description='Owner only')
-# async def sync(interaction: discord.Interaction):
-#     if interaction.user == settings.OWNER_ID:
-#         print('test') 
-#     await bot.tree.sync(guild=interaction.guild)
-#     await interaction.response.send_message('Command tree synced.')
 
 # Global variables
 events = []
@@ -217,6 +209,8 @@ async def deletelore(interaction: discord.Interaction, lore: str):
         await interaction.followup.send(f"The lore **{lore}** was successfully deleted")
     else:
         await interaction.followup.send(f"The lore **{lore}** was not deleted")
+    
+    await load_lore()
 
 @bot.event
 async def on_reaction_add(reaction, user):
