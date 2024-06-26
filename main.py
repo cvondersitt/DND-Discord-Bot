@@ -131,7 +131,6 @@ async def listlore(interaction: discord.Interaction):
     with open("Lore_Snippets/lores.txt", "r") as f:
         lines = [line.strip().lower() for line in f]
     
-    # filtered_lines = [line for line in lines if line.strip()]
     lore_message = f'**Here are the available lores:**'
     for line in lines:
         if line != '':
