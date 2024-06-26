@@ -129,13 +129,13 @@ def format_timedelta(delta):
 async def listlore(interaction: discord.Interaction):
     """Displays all available lores"""
     with open("Lore_Snippets/lores.txt", "r") as f:
-        lines = f.readlines()
+        lines = [line.strip().lower() for line in f]
     
     # filtered_lines = [line for line in lines if line.strip()]
-    lore_message = f'**Here are the available lores:**\n'
+    lore_message = f'**Here are the available lores:**'
     for line in lines:
-        if line.strip():
-            lore_message += line
+        if line != '':
+            lore_message += ('\n' + line)
     lore_message += '\n**To get a lore, type /lore (name of lore)**'
     await interaction.response.send_message(lore_message)
 
