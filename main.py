@@ -16,9 +16,21 @@ bot = commands.Bot(command_prefix='/', intents=intents, help_command=None)
 @bot.event
 async def on_ready():
     print(f'We have logged in as {bot.user}')
+
     await initialize_globals()
+
+    path = 'Lore_Snippets'
+    os.makedirs(path, exist_ok=True)
+
+    file_path = 'Lore_Snippets/lores.txt'
+    if not os.path.exists(file_path):
+        with open(file_path, 'w') as file:
+            file.write("")
+
     await load_lore()
+
     for guild in bot.guilds:
+        bot.tree.clear_commands(guild=guild)
         bot.tree.copy_global_to(guild=guild)
         await bot.tree.sync(guild=guild)
 
@@ -69,7 +81,6 @@ async def sessionstart(interaction: discord.Interaction):
         allowed_mentions=discord.AllowedMentions(everyone=True)
     )
     await remind_end(interaction)
-    
 
 async def remind_end(interaction: discord.Interaction):
     global sessionBegin
@@ -115,16 +126,16 @@ def format_timedelta(delta):
     return ", ".join(parts)
 
 @bot.tree.command()
-async def lorelist(interaction: discord.Interaction):
+async def listlore(interaction: discord.Interaction):
     """Displays all available lores"""
     with open("Lore_Snippets/lores.txt", "r") as f:
         lines = f.readlines()
     
     # filtered_lines = [line for line in lines if line.strip()]
-    lore_message = f'**Here are the available lores:**'
+    lore_message = f'**Here are the available lores:**\n'
     for line in lines:
         if line.strip():
-            lore_message += ('\n' + line)
+            lore_message += line
     lore_message += '\n**To get a lore, type /lore (name of lore)**'
     await interaction.response.send_message(lore_message)
 
@@ -164,13 +175,10 @@ async def addlore(interaction: discord.Interaction, lore: str, image: discord.At
     if os.path.exists(filename) or lore in lores:
         await interaction.response.send_message(f"The lore **{lore}** is already added. Please choose a different lore or delete the existing **{lore}**")
         return
-    path = 'Lore_Snippets/'
-    if not os.path.exists(path):
-        os.mkdir('Lore_Snippets')
     
     await image.save(filename)
     with open("Lore_Snippets/lores.txt", "a") as f:
-        f.write(f"\n{lore.lower()}")
+        f.write(f"\n{lore}")
     await interaction.response.send_message(f"The lore **{lore}** was successfully added.")
 
     await load_lore()
@@ -203,11 +211,15 @@ async def deletelore(interaction: discord.Interaction, lore: str):
             lines = file.readlines()
 
         # Remove the specified line
-        lines = [line for line in lines if line.strip().lower() != lore.lower()]
+        new_lines = ''
+        for line in lines:
+            if line.strip().lower() != lore.lower() and line.strip().lower() != '':
+                new_lines += line
+        # lines = [line for line in lines if line.strip().lower() != lore.lower()]
 
         # Write the modified list back to the file
         with open('Lore_Snippets/lores.txt', 'w') as file:
-            file.writelines(lines)
+            file.writelines(new_lines)
         
         # Delete the lore file
         lore_file_path = f'Lore_Snippets/{lore}.png'
@@ -235,7 +247,7 @@ async def help(interaction: discord.Interaction):
     """Displays the available commands"""
     help_message = (
         '**Here are the available commands:**\n\n'
-        '/lorelist: displays a list of lores\n'
+        '/listlore: displays a list of lores\n'
         '/lore (name of lore): displays the lore\n'
         '/gaming: displays if we are gaming this Sunday\n'
         '/sessionstart: starts a D&D session with a timer. Reminds you ever 5 hours to end\n'
