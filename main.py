@@ -250,6 +250,7 @@ async def help(interaction: discord.Interaction):
         '/sessionend: ends a D&D session and stops the timer\n'
         '/addlore: Write a lore name to add and attach the lore image\n'
         '/deletelore: Deletes a lore from the database\n'
+        '/sync_events: Syncs the current events to the bot\n'
         '/help: displays this message'
     )
     await interaction.response.send_message(help_message)
