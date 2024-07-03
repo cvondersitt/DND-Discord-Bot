@@ -17,7 +17,7 @@ bot = commands.Bot(command_prefix='/', intents=intents, help_command=None)
 async def on_ready():
     print(f'We have logged in as {bot.user}')
 
-    await initialize_globals()
+    await sync_events()
 
     path = 'Lore_Snippets'
     os.makedirs(path, exist_ok=True)
@@ -40,11 +40,6 @@ lores = []
 sessionBegin = None
 deleteLore = False
 
-async def initialize_globals():
-    global events
-    myguild = bot.guilds[1]
-    events = await myguild.fetch_scheduled_events()
-
 async def load_lore():
     global lores
     lores = []
@@ -52,20 +47,26 @@ async def load_lore():
         lores = [line.strip().lower() for line in f]
 
 @bot.tree.command()
+async def sync_events(interaction: discord.Interaction):
+    global events
+    myguild = bot.guilds[1]
+    events = await myguild.fetch_scheduled_events()
+
+@bot.tree.command()
 async def gaming(interaction: discord.Interaction):
     """Shows if we are playing this Sunday"""
     today = datetime.date.today()
-    event_exists = False
-    
+    playingThisSunday = True
     for event in events:
         event_date = event.start_time.date()
-        if today - datetime.timedelta(days=7) <= event_date <= today + datetime.timedelta(days=7) and event.status != 4:
-            await interaction.response.send_message(f'We are gaming this Sunday {event_date.month}/{event_date.day}')
-            event_exists = True
+        if today - datetime.timedelta(days=7) <= event_date <= today + datetime.timedelta(days=7):
+            await interaction.response.send_message('We are not gaming this Sunday')
+            playingThisSunday = False
             break
     
-    if not event_exists:
-        await interaction.response.send_message('We are not gaming this Sunday')
+    if playingThisSunday:
+        await interaction.response.send_message("We are gaming this Sunday")
+        
 
 @bot.tree.command()
 async def sessionstart(interaction: discord.Interaction):
