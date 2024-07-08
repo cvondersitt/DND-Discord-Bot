@@ -17,8 +17,6 @@ bot = commands.Bot(command_prefix='/', intents=intents, help_command=None)
 async def on_ready():
     print(f'We have logged in as {bot.user}')
 
-    await sync_events()
-
     path = 'Lore_Snippets'
     os.makedirs(path, exist_ok=True)
 
@@ -48,7 +46,9 @@ async def load_lore():
 
 @bot.tree.command()
 async def sync_events(interaction: discord.Interaction):
+    """Syncs the current events to the bot"""
     global events
+    await interaction.response.send_message("Events synced.")
     myguild = bot.guilds[1]
     events = await myguild.fetch_scheduled_events()
 
