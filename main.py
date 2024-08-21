@@ -58,6 +58,7 @@ async def gaming(interaction: discord.Interaction):
     today = datetime.date.today()
     playingThisSunday = True
     for event in events:
+        print(event.name)
         event_date = event.start_time.date()
         if today - datetime.timedelta(days=7) <= event_date <= today + datetime.timedelta(days=7):
             await interaction.response.send_message('We are not gaming this Sunday')
